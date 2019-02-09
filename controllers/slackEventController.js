@@ -1,6 +1,7 @@
 const { WebClient } = require('@slack/client')
 const web = new WebClient(process.env.SLACK_TOKEN)
-const { getDictionaryDefinition } = require('../integrations/dictionary')
+
+const { definition } = require('../commands/definition')
 
 function handleEvent (ctx, next) {
   ctx.status = 200
@@ -37,14 +38,7 @@ function handleMessage (event) {
       channel: event.channel
     }).catch(console.error)
   } else if (event.text.startsWith('!def')) {
-    getDictionaryDefinition(tokens[1], (def) => {
-      console.debug('DEF COMING IN \n\n')
-      console.debug(def)
-      web.chat.postMessage({
-        text: def,
-        channel: event.channel
-      }).catch(console.error)
-    })
+    definition(event, tokens, web)
   }
 }
 
