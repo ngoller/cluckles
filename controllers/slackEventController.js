@@ -1,7 +1,7 @@
 const { WebClient } = require('@slack/client')
 const web = new WebClient(process.env.SLACK_TOKEN)
 
-const { definition } = require('../commands/definition')
+const { wordInfo } = require('../commands/wordInfo')
 
 function handleEvent (ctx, next) {
   ctx.status = 200
@@ -31,14 +31,25 @@ function handleEvent (ctx, next) {
 };
 
 function handleMessage (event) {
-  const tokens = event.text.split(' ')
-  if (event.text.startsWith('!?')) {
-    web.chat.postMessage({
-      text: Math.random() > 0.5 ? ':nod:' : ':shake:',
-      channel: event.channel
-    }).catch(console.error)
-  } else if (event.text.startsWith('!def')) {
-    definition(event, tokens, web)
+  if (event.text && event.text[0] === '!') {
+    const tokens = event.text.split(' ')
+    const command = tokens[0].toLowerCase().substring(1)
+    switch (command) {
+      case '?':
+        web.chat.postMessage({
+          text: Math.random() > 0.5 ? ':nod:' : ':shake:',
+          channel: event.channel
+        }).catch(console.error)
+        break
+      case 'def':
+      case 'define':
+      case 'syn':
+      case 'synonym':
+      case 'ant':
+      case 'antonym':
+        wordInfo(command, event, tokens, web)
+        break
+    }
   }
 }
 
