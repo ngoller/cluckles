@@ -1,24 +1,7 @@
 const request = require('../lib/request')
 
-const appId = process.env.OXFORD_APP_ID
-const appKey = process.env.OXFORD_APP_KEY
 const merriamKey = process.env.MERRIAM_DICTIONARY_KEY
 const thesaurusKey = process.env.MERRIAM_THESAURUS_KEY
-
-function getOxfordDefinition (word, callback) {
-  const options = {
-    hostname: 'od-api.oxforddictionaries.com',
-    path: `/api/v1/entries/en/ace/regions=us`,
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-      app_id: appId,
-      app_key: appKey
-    }
-  }
-
-  request.request(options, callback)
-}
 
 function getMerriamDefinition (word, callback) {
   const options = {
@@ -29,8 +12,13 @@ function getMerriamDefinition (word, callback) {
 
   request.request(options, (json) => {
     try {
-      console.log(json)
-      const definition = json[0].shortdef.join('\n')
+      const firstOption = json[0]
+      let definition
+      if (typeof firstOption === 'string') {
+        definition = `Did you mean ${firstOption}?`
+      } else {
+        definition = json[0].shortdef.join('\n')
+      }
       callback(definition)
     } catch (error) {
       callback()
@@ -47,8 +35,13 @@ function getMerriamSynonym (word, callback) {
 
   request.request(options, (json) => {
     try {
-      console.log(json)
-      const synonym = json[0].meta.syns[0].join(', ')
+      const firstOption = json[0]
+      let synonym
+      if (typeof firstOption === 'string') {
+        synonym = `Did you mean ${firstOption}?`
+      } else {
+        synonym = json[0].meta.syns[0].join(', ')
+      }
       callback(synonym)
     } catch (error) {
       callback()
@@ -65,7 +58,6 @@ function getMerriamAntonym (word, callback) {
 
   request.request(options, (json) => {
     try {
-      console.log(json)
       const firstOption = json[0]
       let antonym
       if (typeof firstOption === 'string') {
@@ -80,4 +72,4 @@ function getMerriamAntonym (word, callback) {
   })
 }
 
-module.exports = { getMerriamDefinition, getMerriamSynonym, getMerriamAntonym, getOxfordDefinition }
+module.exports = { getMerriamDefinition, getMerriamSynonym, getMerriamAntonym }
